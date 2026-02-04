@@ -1,0 +1,51 @@
+services:
+  db:
+    image: m.daocloud.io/docker.io/library/mysql:8.0
+    container_name: snack_store_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: snack_store
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - snack_store_db_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_general_ci"
+      - "--default-time-zone=+08:00"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p12345678"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    container_name: snack_store_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: 12345678
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/snack_store?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend_v2
+    container_name: snack_store_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  snack_store_db_data:

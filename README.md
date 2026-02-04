@@ -16,6 +16,28 @@
 
 ## 快速启动
 
+## Docker 一键启动（推荐）
+
+确保本机已安装 Docker Desktop，然后在项目根目录执行：
+
+```bash
+docker compose up -d --build
+```
+
+启动后访问：
+
+- 前端：http://localhost:5173
+- 后端：http://localhost:8080
+- MySQL：localhost:3307（root / 12345678）
+
+说明：
+- MySQL 会在首次启动时自动执行 [schema.sql](file:///Users/libra520/JavaProject/biyesheji/ling_shi_shang_cheng/snack_store/backend/src/main/resources/schema.sql)，包含建表与初始化数据
+- 如需清空数据库并重置初始化数据：
+
+```bash
+docker compose down -v
+```
+
 ### 1）启动后端
 
 1. 启动 MySQL
